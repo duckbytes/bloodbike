@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "create-react-app": "^3.0.1"
+  },
+  "devDependencies": {
+    "node-sass": "^4.12.0"
   }
 }

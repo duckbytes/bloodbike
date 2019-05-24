@@ -1,0 +1,9 @@
+.jobsList {
+  background-color: grey;
+  display: flex;
+  flex-direction: column;
+  margin: 10px;
+  border-radius: 5px;
+}
+.tableHeading {
+}
