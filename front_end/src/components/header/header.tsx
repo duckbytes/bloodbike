@@ -1,5 +1,6 @@
 import * as React from "react";
 import "./header.css";
+import logo from "./logo.png";
 
 export interface IProps {}
 
@@ -11,7 +12,7 @@ class Header extends React.Component<IProps, IState> {
     return (
       <>
         <div className="header">
-          <span className="logo">Logo</span>
+          <img src={logo} alt={"charity logo"} className="logo" />
           <h1>
             Co-ordinator <br />
             dashboard
