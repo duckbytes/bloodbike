@@ -1,5 +1,5 @@
 export interface IJob {
-  timeOfCall: number;
+  timeOfCall: string;
   contents: string;
   from: string;
   // to: string;
@@ -10,19 +10,19 @@ export interface IJob {
 
 export const testData: IJob[] = [
   {
-    timeOfCall: 1907,
-    contents: "string",
-    from: "string"
+    timeOfCall: "TOC",
+    contents: "Contents",
+    from: "From"
   },
   {
-    timeOfCall: 1907,
-    contents: "string",
-    from: "string"
+    timeOfCall: "1907",
+    contents: "blood",
+    from: "Eliz.Casson unit"
   },
   {
-    timeOfCall: 1907,
-    contents: "string",
-    from: "string"
+    timeOfCall: "1907",
+    contents: "milk",
+    from: "SoutmeadNICU"
   }
 ];
 export default testData;

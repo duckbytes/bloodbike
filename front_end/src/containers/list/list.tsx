@@ -1,9 +1,11 @@
 import * as React from "react";
 import Job from "../../components/job/job";
 import "./list.css";
-import { testData } from "../../test-data";
+import { testData, IJob } from "../../test-data";
 
-export interface IProps {}
+export interface IProps {
+  filteredList: IJob[];
+}
 
 export interface IState {}
 
@@ -15,14 +17,12 @@ class List extends React.Component<IProps, IState> {
       <>
         <div className="jobsList">
           <div className="tableHeading">
-            <Job />
+            <Job job={testData[0]} />
             <hr />
           </div>
-          <Job />
-          <Job />
-          <Job />
-          <Job />
-          <Job />
+          {this.props.filteredList.map((jobdata, index) => (
+            <Job key={index} job={jobdata} />
+          ))}
         </div>
       </>
     );
