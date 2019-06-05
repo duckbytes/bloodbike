@@ -3,8 +3,26 @@
   padding: 10px;
   margin: 5px;
   border-radius: 5px;
-  display: flex;
+  display: grid;
+  grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
   flex-direction: row;
   justify-content: space-between;
   color: white;
+}
+.job > div {
+  border: dashed cyan 1px;
+}
+.timeOfCall {
+}
+.packageContents {
+}
+.transportFrom {
+}
+.transportTo {
+}
+.rider {
+}
+.collected {
+}
+.delivered {
 }
