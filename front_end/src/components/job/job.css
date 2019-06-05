@@ -4,7 +4,7 @@
   margin: 5px;
   border-radius: 5px;
   display: grid;
-  grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 100px 1fr 1fr 1fr 100px 100px 100px;
   flex-direction: row;
   justify-content: space-between;
   color: white;

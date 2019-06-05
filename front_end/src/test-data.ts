@@ -41,7 +41,7 @@ export const testData: IJob[] = [
     contents: "blood",
     from: "Eliz.Casson unit",
     to: "BRI A&E",
-    rider: "North",
+    rider: "unassigned",
     collected: "1938",
     delivered: "2005"
   },
