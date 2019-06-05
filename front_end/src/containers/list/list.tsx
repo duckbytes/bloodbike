@@ -17,8 +17,18 @@ class List extends React.Component<IProps, IState> {
       <>
         <div className="jobsList">
           <div className="tableHeading">
-            <Job job={testData[0]} />
-            <hr />
+            {/* <Job job={testData[0]} /> */}
+            {/* if you re-arrange columns in Job component, you need to re-arrange these, too */}
+            <div>
+              <div>Contents</div>
+              <div>From</div>
+              <div>To</div>
+              <div>Rider</div>
+              <div>TOC</div>
+              <div>Collected at</div>
+              <div>Delivered at</div>
+            </div>
+            {/* <hr /> */}
           </div>
           {this.props.filteredList.map((jobdata, index) => (
             <Job key={index} job={jobdata} />

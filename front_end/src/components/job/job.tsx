@@ -14,6 +14,9 @@ class Job extends React.Component<IProps, IState> {
     return (
       <>
         <div className="job">
+          {/* the order of columns depends on the below. If columns 
+          need to be re-arranged, you will need to re-examine column
+          widths in CSS files, too */}
           <div className="packageContents">{this.props.job.contents}</div>
           <div className="transportFrom">{this.props.job.from}</div>
           <div className="transportTo">{this.props.job.to}</div>
