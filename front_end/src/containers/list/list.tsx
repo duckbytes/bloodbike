@@ -1,7 +1,7 @@
 import * as React from "react";
 import Job from "../../components/job/job";
 import "./list.css";
-import { testData, IJob } from "../../test-data";
+import { IJob } from "../../test-data";
 
 export interface IProps {
   filteredList: IJob[];
@@ -12,7 +12,6 @@ export interface IState {}
 class List extends React.Component<IProps, IState> {
   // state = { :  }
   public render() {
-    console.log(testData);
     return (
       <>
         <div className="jobsList">
