@@ -18,3 +18,8 @@ The front end will include:
 git checkout the front-end branch
 yarn install
 yarn start to view the front-end in the browser
+
+## hosting
+
+yarn build (build the latest version)
+yarn firebase deploy
