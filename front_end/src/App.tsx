@@ -11,8 +11,26 @@ export interface IProps {
 class App extends Component {
   public state = { filteredList: testData };
   public render() {
+    // const modal = document.getElementById("myModal");
+    // const infoIcon = document.getElementById("welcomeInfo");
+
+    // infoIcon.onclick = modalToggled => {
+    //   modalToggled.preventDefault();
+    //   modal.style.display = "block";
+    // };
+    // window.onclick = event => {
+    //   if (event.target === modal) {
+    //     modal.style.display = "none";
+    //   }
+    // };
+
     return (
       <>
+        <div id="myModal" className="modal">
+          <div className="modal-content">
+            <p>This is the welcome modal</p>
+          </div>
+        </div>
         <Header />
         <List filteredList={this.state.filteredList} />
       </>

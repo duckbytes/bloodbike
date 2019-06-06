@@ -8,6 +8,7 @@ export interface IState {}
 
 class Header extends React.Component<IProps, IState> {
   // state = { :  }
+
   public render() {
     return (
       <>
@@ -17,7 +18,10 @@ class Header extends React.Component<IProps, IState> {
             Co-ordinator <br />
             dashboard
           </h1>
-          <div className="commandBox">Command box here</div>
+          <div className="commandBox">
+            <i id="welcomeInfo" className="fas fa-info-circle" />
+            Command box here
+          </div>
         </div>
       </>
     );

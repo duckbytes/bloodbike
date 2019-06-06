@@ -28,7 +28,6 @@ class List extends React.Component<IProps, IState> {
               <div>Collected at</div>
               <div>Delivered at</div>
             </div>
-            {/* <hr /> */}
           </div>
           {this.props.filteredList.map((jobdata, index) => (
             <Job key={index} job={jobdata} />
