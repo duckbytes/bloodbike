@@ -10,15 +10,6 @@ export interface IJob {
 
 export const testData: IJob[] = [
   {
-    timeOfCall: "TOC",
-    contents: "Contents",
-    from: "From",
-    to: "To",
-    rider: "Rider",
-    collected: "Collected at",
-    delivered: "Delivered at"
-  },
-  {
     timeOfCall: "1907",
     contents: "blood",
     from: "Eliz.Casson unit",
