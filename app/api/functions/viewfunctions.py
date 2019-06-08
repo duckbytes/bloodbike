@@ -4,7 +4,7 @@ from flask import request
 from app import models
 from app.exceptions import InvalidRangeError
 from app.exceptions import SchemaValidationError
-from app.views.functions.errors import forbidden_error
+from app.api.functions.errors import forbidden_error
 from app import schemas
 
 user_schema = schemas.UserSchema()
@@ -15,17 +15,19 @@ session_schema = schemas.SessionSchema()
 address_schema = schemas.AddressSchema()
 user_username_schema = schemas.UserUsernameSchema()
 user_address_schema = schemas.UserAddressSchema()
+deliverable_schema = schemas.DeliverableSchema()
+note_schema = schemas.NoteSchema()
 
 
 def user_id_match_or_admin(func):
     @functools.wraps(func)
-    def wrapper(self, _id):
+    def wrapper(self, user_id):
         if 'admin' in utilities.current_rolenames():
-            return func(self, _id)
-        if utilities.current_user_id() == _id:
-            return func(self, _id)
+            return func(self, user_id)
+        if utilities.current_user_id() == user_id:
+            return func(self, user_id)
         else:
-            return forbidden_error("Object not owned by user: user id:".format(_id))
+            return forbidden_error("Object not owned by user: user id:".format(user_id))
     return wrapper
 
 
@@ -42,6 +44,10 @@ def load_request_into_object(model_enum):
         return task_schema.load(request_json).data
     if model_enum is models.Objects.VEHICLE:
         return vehicle_schema.load(request_json).data
+    if model_enum is models.Objects.DELIVERABLE:
+        return deliverable_schema.load(request_json).data
+    if model_enum is models.Objects.NOTE:
+        return note_schema.load(request_json).data
 
 
 def get_all_users():
@@ -72,7 +78,7 @@ def get_range(items, _range="0-50", order="descending"):
         items.reverse()
 
     for i in items[:]:
-        if i.flaggedForDeletion:
+        if i.flagged_for_deletion:
             items.remove(i)
 
     return items[start:end]
