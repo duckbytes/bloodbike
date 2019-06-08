@@ -82,6 +82,7 @@ class Users(Resource):
 
         return jsonify(users_schema.dump(users).data)
 
+    @flask_praetorian.roles_accepted('admin')
     def post(self):
         try:
             user = load_request_into_object(USER)
