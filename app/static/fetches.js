@@ -19,6 +19,7 @@ class users {
 
     constructor(){
         this.token = "";
+        this.bearer = "";
     }
 
     login(username, password) {
@@ -33,7 +34,8 @@ class users {
             .then(json)
             .then(function (data) {
                 console.log('Request succeeded with JSON response', data);
-                self.token = data['access_token']
+                self.token = data['access_token'];
+                self.bearer = "Bearer " + self.token;
             })
             .catch(function (error) {
                 console.log('Request failed', error);
@@ -42,15 +44,13 @@ class users {
     }
 
     get_users() {
-        let bearer = 'Bearer ' + this.token;
-        console.log(bearer)
-
+        let self = this;
         fetch('http://localhost:5000/api/v0.1/users', {
             method: 'GET',
             withCredentials: true,
             credentials: 'include',
             headers: new Headers({
-                'Authorization': bearer,
+                'Authorization': self.bearer,
                 'Content-Type': 'application/json'
             })
         })
@@ -61,6 +61,49 @@ class users {
             }).catch(function (error) {
             console.log('Request failed', error);
         });
+    }
+
+    get_user(user_id) {
+        let self = this;
+        fetch('http://localhost:5000/api/v0.1/user/' + user_id, {
+            method: 'GET',
+            withCredentials: true,
+            credentials: 'include',
+            headers: new Headers({
+                'Authorization': self.bearer,
+                'Content-Type': 'application/json'
+            })
+        })
+            .then(status)
+            .then(json)
+            .then(function (data) {
+                console.log('Request succeeded with JSON response', data);
+            }).catch(function (error) {
+            console.log('Request failed', error);
+        });
+
+    }
+
+    create_user(data) {
+        let self = this;
+        fetch('http://localhost:5000/api/v0.1/users', {
+            method: 'POST',
+            withCredentials: true,
+            credentials: 'include',
+            headers: new Headers({
+                'Authorization': self.bearer,
+                'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify(data)
+        })
+            .then(json)
+            .then(function (data) {
+                console.log('Request succeeded with JSON response', data);
+            })
+            .catch(function (error) {
+                console.log('Request failed', error);
+            });
+
     }
 }
 
