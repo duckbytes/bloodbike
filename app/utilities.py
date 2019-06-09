@@ -7,6 +7,7 @@ from app.api.functions.notefunctions import get_note_object
 from app.api.functions.deliverablefunctions import get_deliverable_object
 from app.api.functions.errors import already_flagged_for_deletion_error
 from app.exceptions import ObjectNotFoundError
+from uuid import UUID
 
 
 def add_item_to_delete_queue(item):
@@ -93,3 +94,11 @@ def get_all_objects(type):
         return obj
     else:
         raise ObjectNotFoundError("There is no object of this type")
+
+def is_valid_uuid(uuid_to_test, version=4):
+    try:
+        uuid_obj = UUID(uuid_to_test, version=version)
+    except:
+        return False
+
+    return str(uuid_obj) == uuid_to_test

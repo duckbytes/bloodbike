@@ -10,8 +10,7 @@ from app.api.functions.viewfunctions import get_range
 from app.api.functions.userfunctions import get_user_object, is_user_present
 from app.api.functions.sessionfunctions import session_id_match_or_admin
 from app.api.functions.errors import forbidden_error, not_found, unauthorised_error, internal_error, schema_validation_error
-from app.utilities import get_object
-from app.utilities import add_item_to_delete_queue
+from app.utilities import get_object, add_item_to_delete_queue, is_valid_uuid
 import uuid
 
 SESSION = models.Objects.SESSION
@@ -82,6 +81,8 @@ class Sessions(Resource):
             session = models.Session()
 
         if user:
+            if not is_valid_uuid(user):
+                return schema_validation_error("Provided user ID {} is not a valid UUID string".format(user))
             if 'admin' not in utilities.current_rolenames():
                 return unauthorised_error("only admins can create sessions for other users")
             if not is_user_present(user):

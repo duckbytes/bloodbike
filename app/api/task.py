@@ -38,8 +38,21 @@ class Task(Resource):
         return add_item_to_delete_queue(task)
 
 
-@ns.route('s', endpoint="tasks_list")
+@ns.route('s',
+          's/<session_id>', endpoint="tasks_list")
 class Tasks(Resource):
+    @flask_praetorian.roles_accepted('coordinator', 'admin')
+    def get(self, session_id):
+        if not session_id:
+            return not_found(TASK)
+
+        session = get_object(models.Objects.SESSION, session_id)
+
+        if (session):
+            return jsonify(taskSchema.dump(session.tasks, many=True).data)
+        else:
+            return not_found(models.Objects.SESSION, session_id)
+
     @flask_praetorian.roles_accepted('coordinator', 'admin')
     def post(self):
         task = None

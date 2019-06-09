@@ -58,7 +58,7 @@ class Task(db.Model):
     final_duration = db.Column(db.Time)
     miles = db.Column(db.Integer)
     flagged_for_deletion = db.Column(db.Boolean, default=False)
-    session = db.Column(UUID(as_uuid=True), db.ForeignKey('session.uuid'))
+    session_id = db.Column(UUID(as_uuid=True), db.ForeignKey('session.uuid'))
     deliverables = db.relationship('Deliverable', backref='deliverable_task', lazy='dynamic')
     notes = db.relationship('Note', backref='task_parent', lazy='dynamic')
 

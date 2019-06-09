@@ -85,7 +85,7 @@ class TaskSchema(ma.Schema):
     class Meta:
         model = models.Task
         fields = ('uuid', 'pickup_address', 'dropoff_address', 'patch', 'contact_name',
-                  'contact_number', 'priority', 'session', 'timestamp', 'deliverables', 'notes', 'links')
+                  'contact_number', 'priority', 'session_id', 'timestamp', 'deliverables', 'notes', 'links')
 
     contactNumber = ma.Int()
 
@@ -110,7 +110,7 @@ class SessionSchema(ma.Schema):
         fields = ('uuid', 'user_id',
                   'timestamp', 'tasks',
                   'notes')
-    tasks = fields.fields.Nested(TaskSchema, many=True, exclude=('notes', 'deliverables', 'links:self'))
+    tasks = fields.fields.Nested(TaskSchema, many=True, exclude=('notes', 'deliverables'))
     notes = fields.fields.Nested(NoteSchema, many=True, exclude=('vehicle', 'user', 'deliverable', 'task'))
 
     links = ma.Hyperlinks({
