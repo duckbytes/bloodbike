@@ -8,6 +8,7 @@ cache:
 script:
   - echo "deploying"
   - cd front_end/
+  - yarn install
   - yarn build
 branches:
   only:
