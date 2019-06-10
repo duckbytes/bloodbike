@@ -10,6 +10,7 @@ script:
   - cd front_end/
   - yarn install
   - yarn build
+  - cd ..
 branches:
   only:
     - travis
