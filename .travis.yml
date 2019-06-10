@@ -15,5 +15,5 @@ branches:
 deploy:
   provider: firebase
   skip_cleanup: true
-  local_dir: build
+  local_dir: front_end/build
   token: $FIREBASE_TOKEN
