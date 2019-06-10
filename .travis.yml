@@ -5,7 +5,7 @@ cache:
   directories:
     - node_modules
 script:
-  - echo deploying
+  - echo "deploying"
   - yarn build
 branches:
   only:
