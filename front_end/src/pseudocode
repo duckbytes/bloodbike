@@ -20,3 +20,5 @@ function handleClick (event) {
 {myStuff.map( thing => <TableRow key={thing.id} data={thing}/>)}
 </tbody>
 </table>
+
+ 
