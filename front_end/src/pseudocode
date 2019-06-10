@@ -1,0 +1,22 @@
+Dave's pseudocode
+
+render a job/card/component
+
+function TableRow ({ data }) {
+
+    return <tr id={data.id}><td>{data.name}</td></tr>
+
+}
+
+when the component is clicked, find that particular card in the data (searching by unique job identifier)
+function handleClick (event) {
+    const dataId = event.target.id
+    const currentThing = myStuff.find(item => item.id == dataId)
+    if (currentThing) setState({ activeThing: currentThing })
+}
+
+<table onClick={handleClick}>
+<tbody>
+{myStuff.map( thing => <TableRow key={thing.id} data={thing}/>)}
+</tbody>
+</table>
