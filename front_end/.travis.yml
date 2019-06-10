@@ -10,6 +10,7 @@ script:
 branches:
   only:
     - travis
+    - master
 deploy:
   provider: firebase
   skip_cleanup: true
