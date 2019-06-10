@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  background-color: rgb(221, 51, 50, 1);
+  background-color: rgb(221, 50, 50);
 }
 .logo,
 .commandBox,
