@@ -4,12 +4,10 @@ node_js:
 cache:
   directories:
     - node_modules
-before script:
-  - cd front_end
-  - echo "moved to front end"
+
 script:
   - echo "deploying"
-  - yarn install
+  - cd front_end/
   - yarn build
 branches:
   only:
