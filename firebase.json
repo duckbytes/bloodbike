@@ -1,0 +1,6 @@
+{
+  "hosting": {
+    "public": "front_end/build",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+  }
+}

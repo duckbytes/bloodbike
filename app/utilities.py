@@ -1,9 +1,11 @@
 from app import app, db, models
-from app.views.functions.userfunctions import get_user_object, get_all_users
-from app.views.functions.sessionfunctions import get_session_object, get_all_sessions
-from app.views.functions.taskfunctions import get_task_object, get_all_tasks
-from app.views.functions.vehiclefunctions import get_vehicle_object, get_all_vehicles
-from app.views.functions.errors import already_flagged_for_deletion_error
+from app.api.functions.userfunctions import get_user_object, get_all_users
+from app.api.functions.sessionfunctions import get_session_object, get_all_sessions
+from app.api.functions.taskfunctions import get_task_object, get_all_tasks
+from app.api.functions.vehiclefunctions import get_vehicle_object, get_all_vehicles
+from app.api.functions.notefunctions import get_note_object
+from app.api.functions.deliverablefunctions import get_deliverable_object
+from app.api.functions.errors import already_flagged_for_deletion_error
 from app.exceptions import ObjectNotFoundError
 
 
@@ -11,14 +13,15 @@ def add_item_to_delete_queue(item):
     if not item:
         return
 
-    if item.flaggedForDeletion:
-        return already_flagged_for_deletion_error("user", item.uuid)
+    if item.flagged_for_deletion:
+        return already_flagged_for_deletion_error("user", str(item.uuid))
 
-    item.flaggedForDeletion = True
+    item.flagged_for_deletion = True
 
-    delete = models.DeleteFlags(objectUUID=item.uuid, objectType=get_object_enum(item), timeToDelete=app.config['DEFAULT_DELETE_TIME'])
+    delete = models.DeleteFlags(object_uuid=item.uuid, object_type=get_object_enum(item), time_to_delete=app.config['DEFAULT_DELETE_TIME'])
 
     db.session.add(item)
+    db.session.commit()
     db.session.add(delete)
     db.session.commit()
 
@@ -34,6 +37,10 @@ def get_object_enum(item):
         return models.Objects.TASK
     elif isinstance(item, models.Vehicle):
         return models.Objects.VEHICLE
+    elif isinstance(item, models.Note):
+        return models.Objects.NOTE
+    elif isinstance(item, models.Deliverable):
+        return models.Objects.DELIVERABLE
     else:
         raise ValueError("No corresponding enum to this object")
 
@@ -43,7 +50,9 @@ def object_type_to_string(type):
         models.Objects.SESSION: "session",
         models.Objects.USER: "user",
         models.Objects.TASK: "task",
-        models.Objects.VEHICLE: "vehicle"
+        models.Objects.VEHICLE: "vehicle",
+        models.Objects.NOTE: "note",
+        models.Objects.DELIVERABLE: "deliverable"
     }
 
     return switch.get(type, lambda: None)
@@ -60,6 +69,10 @@ def get_object(type, _id):
             return get_task_object(_id)
         elif type == models.Objects.VEHICLE:
             return get_vehicle_object(_id)
+        elif type == models.Objects.NOTE:
+            return get_note_object(_id)
+        elif type == models.Objects.DELIVERABLE:
+            return get_deliverable_object(_id)
 
     except ObjectNotFoundError:
         raise

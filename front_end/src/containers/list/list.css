@@ -1,0 +1,25 @@
+.jobsList {
+  display: flex;
+  flex-direction: column;
+  margin: 0px;
+  border-radius: 5px;
+}
+.tableHeading {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  font-weight: bolder;
+  border-top: 3px solid rgb(221, 51, 50, 1);
+}
+.tableHeading > div {
+  padding: 0px 10px 0px 10px;
+  margin: 5px 10px 0px 10px;
+  display: grid;
+  align-items: end;
+  /* there will be two places to modify the column widths if you re-arrange columns */
+  grid-template-columns: 1fr 1fr 1fr 100px 100px 100px 100px;
+  flex-direction: row;
+  justify-content: space-between;
+  color: black;
+  /* border: cyan dashed 1px; */
+}

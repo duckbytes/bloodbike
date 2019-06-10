@@ -1,10 +1,10 @@
 from flask import jsonify
 from app import schemas, models
-from flask_restful import reqparse, Resource
+from flask_restplus import reqparse, Resource
 import flask_praetorian
-from app import taskApi as api
-from app.views.functions.viewfunctions import load_request_into_object
-from app.views.functions.errors import internal_error, not_found
+from app import task_ns as ns
+from app.api.functions.viewfunctions import load_request_into_object
+from app.api.functions.errors import internal_error, not_found
 from app.utilities import add_item_to_delete_queue, get_object
 from app.exceptions import ObjectNotFoundError
 
@@ -14,27 +14,31 @@ taskSchema = schemas.TaskSchema()
 
 TASK = models.Objects.TASK
 
+
+@ns.route('/<task_id>', endpoint="task_detail")
 class Task(Resource):
     @flask_praetorian.auth_required
-    def get(self, _id):
-        if not _id:
+    def get(self, task_id):
+        if not task_id:
             return not_found(TASK)
 
-        task = get_object(TASK, _id)
+        task = get_object(TASK, task_id)
 
         if (task):
             return jsonify(taskSchema.dump(task).data)
         else:
-            return not_found(TASK, _id)
+            return not_found(TASK, task_id)
 
     @flask_praetorian.roles_required('admin')
-    def delete(self, _id):
+    def delete(self, task_id):
         try:
-            task = get_object(TASK, _id)
+            task = get_object(TASK, task_id)
         except ObjectNotFoundError:
             return not_found(TASK)
         return add_item_to_delete_queue(task)
 
+
+@ns.route('s', endpoint="tasks_list")
 class Tasks(Resource):
     @flask_praetorian.roles_accepted('coordinator', 'admin')
     def post(self):
@@ -49,8 +53,4 @@ class Tasks(Resource):
 
         return {'uuid': str(task.uuid), 'message': 'Task {} created'.format(task.uuid)}, 201
 
-api.add_resource(Task,
-                 '/<_id>')
-api.add_resource(Tasks,
-                 's')
 
