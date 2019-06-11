@@ -1,7 +1,6 @@
-import os
 from flask_login import LoginManager
+import os
 from flask import Flask
-#from flask_restful import Api
 from flask_restplus import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
@@ -10,8 +9,6 @@ import flask_praetorian
 import logging
 from config import Config
 import flask_cors
-import _thread
-import time
 from flask_buzz import FlaskBuzz
 
 logging.basicConfig(filename='/dev/null', level=logging.DEBUG)
@@ -23,7 +20,10 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
-app = Flask(__name__)
+template_dir = os.path.abspath('app/site/templates')
+static_dir = os.path.abspath('app/site/static')
+app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
+
 app.config.from_object(Config)
 
 db = SQLAlchemy(app)
@@ -63,12 +63,13 @@ app.debug = True
 migrate = Migrate(app, db)
 
 from app import models
-from app.api import task, user, views, site, login, session, vehicle, testing_views, deliverable, note
+from app.api import task, user, site, login, session, vehicle, testing_views, deliverable, note
+from app.site import views
 
 
 guard.init_app(app, models.User)
 #app.register_blueprint(task.mod)
-app.register_blueprint(site.mod)
+app.register_blueprint(views.mod)
 app.register_blueprint(testing_views.mod)
 #app.register_blueprint(decoder.mod)
 #app.register_blueprint(encoder.mod)
