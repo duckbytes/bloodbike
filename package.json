@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "create-react-app": "^3.0.1",
+    "firebase-tools": "^6.11.0",
+    "global": "^4.3.2"
+  },
+  "devDependencies": {
+    "node-sass": "^4.12.0"
+  }
+}
