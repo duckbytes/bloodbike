@@ -1,12 +1,11 @@
 from flask import render_template, Blueprint
 
-mod = Blueprint('site', __name__, url_prefix='/site')
+mod = Blueprint('site', __name__, url_prefix='/site', template_folder='templates', static_folder='static')
 
 
-@mod.route('/home', methods=['GET'])
+@mod.route('/', methods=['GET'])
 def hello():
-    return render_template('index.html',
-                           title="Freewheelers EVS")
+    return render_template('index_old.html')
 
 @mod.route('/fetch.js', methods=['GET'])
 def fetch():

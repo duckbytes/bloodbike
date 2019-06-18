@@ -64,13 +64,14 @@ migrate = Migrate(app, db)
 
 from app import models
 from app.api import task, user, site, login, session, vehicle, testing_views, deliverable, note
-from app.site import views
+from app.site import views, session_views
 
 
 guard.init_app(app, models.User)
 #app.register_blueprint(task.mod)
 app.register_blueprint(views.mod)
-app.register_blueprint(testing_views.mod)
+app.register_blueprint(session_views.mod)
+#app.register_blueprint(testing_views.mod)
 #app.register_blueprint(decoder.mod)
 #app.register_blueprint(encoder.mod)
 
