@@ -3,6 +3,7 @@ import "./App.css";
 import Header from "./components/header/header";
 import List from "./containers/list/list";
 import testData, { IJob } from "./test-data";
+import Control from './api_control'
 
 export interface IProps {
   filteredList: IJob[];

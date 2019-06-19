@@ -56,6 +56,25 @@ class Vehicle {
     }
 }
 
+class Location {
+    constructor(bearer, api_url){
+        this.bearer = bearer;
+        this.api_url = api_url;
+    }
+
+    async get_locations() {
+        return make_fetch(this.api_url, "locations", "GET", this.bearer)
+    }
+
+    async get_location(location_id) {
+        return make_fetch(this.api_url, "location/" + location_id, "GET", this.bearer)
+    }
+
+    async create_location(input_data) {
+        return make_fetch(this.api_url, "locations", "POST", this.bearer, "application/json", input_data)
+    }
+}
+
 class Note {
     constructor(bearer, api_url){
         this.bearer = bearer;

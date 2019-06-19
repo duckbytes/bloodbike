@@ -11,3 +11,7 @@ venv/
 # bloodbike
 app.db
 node_modules
+
+# react
+front_end/build/
+
