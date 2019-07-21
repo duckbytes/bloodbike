@@ -161,10 +161,9 @@ class User {
     }
 }
 
-class Control extends  Component {
-    constructor(props){
-        super(props);
-        this.api_url = props.api_url;
+class Control {
+    constructor(api_url) {
+        this.api_url = api_url;
         this.token = "";
         this.bearer = "";
         this.sessions = undefined;
@@ -173,6 +172,7 @@ class Control extends  Component {
         this.vehicles = undefined;
         this.initialised = false;
         this.users = undefined;
+        this.login = this.login.bind(this);
     }
 
     async login(username, password) {
@@ -187,6 +187,7 @@ class Control extends  Component {
             .then(json)
             .then(function (data) {
                 console.log("Login successful");
+                console.log(this);
                 this.token = data['access_token'];
                 this.bearer = "Bearer " + this.token;
                 this.users = new User(this.bearer, this.api_url);
@@ -198,6 +199,7 @@ class Control extends  Component {
             })
             .catch(function (error) {
                 console.log("Request failed", error);
+                throw error
             });
     }
 }
