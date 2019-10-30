@@ -8,7 +8,7 @@ import ReactNotification from 'react-notifications-component'
 import 'react-notifications-component/dist/theme.css'
 
 
-const apiUrl = 'http://bloodbike-api.herokuapp.com/api/v0.1/';
+const apiUrl = 'https://bloodbike-api.herokuapp.com/api/v0.1/';
 
 ReactDOM.render((
     <BrowserRouter>
