@@ -21,10 +21,6 @@ logger.setLevel(logging.DEBUG)
 
 app = Flask(__name__, static_folder="site/static", template_folder="site")
 
-
-@app.route("/")
-def react():
-    return render_template('index.html', api_url="http://localhost:5000")
 app.config.from_object(Config)
 
 app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
@@ -61,12 +57,12 @@ app.debug = True
 migrate = Migrate(app, db)
 
 from app import models
-from app.api import task, user, views, site, login, session, vehicle, testing_views, deliverable, note, location, uuid_lookup, search, priority, ping
+from app.api import task, user, site, login, session, vehicle, testing_views, deliverable, note, location, uuid_lookup, search, priority, ping
 
-site_blueprint = Blueprint('site', __name__, url_prefix='/')
+#site_blueprint = Blueprint('site', __name__, url_prefix='/')
 
 guard.init_app(app, models.User)
-app.register_blueprint(site_blueprint)
+#app.register_blueprint(site_blueprint)
 app.register_blueprint(testing_views.mod)
 
 
