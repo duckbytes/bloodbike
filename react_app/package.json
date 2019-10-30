@@ -7,6 +7,7 @@
     "@material-ui/icons": "^4.2.1",
     "@material-ui/lab": "^4.0.0-alpha.28",
     "downshift": "^3.2.12",
+    "express": "^4.17.1",
     "immutability-helper": "^3.0.1",
     "lodash": "^4.17.15",
     "prop-types": "^15.7.2",
@@ -38,5 +39,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
+  "main": "index.js",
+  "devDependencies": {},
+  "author": "",
+  "license": "ISC"
 }
