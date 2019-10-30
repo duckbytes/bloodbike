@@ -10,6 +10,7 @@
     "express": "^4.17.1",
     "immutability-helper": "^3.0.1",
     "lodash": "^4.17.15",
+    "moment": "^2.24.0",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
@@ -25,7 +26,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-    "engines": {
+  "engines": {
     "node": "~12.13.0",
     "npm": "~6.12.0"
   },
