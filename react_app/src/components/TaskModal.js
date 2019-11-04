@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -6,9 +6,9 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import {TaskCard} from "./TaskCardsColoured";
+import Grid from "@material-ui/core/Grid";
+import { useHistory } from "react-router-dom";
 import AddressDetailsCollapsible from "./AddressDetail";
-import {withRouter} from 'react-router-dom';
 import UsersSelect from "./UsersSelect";
 import ToggleTimeStamp from "./ToggleTimeStamp";
 import update from 'immutability-helper';
@@ -19,52 +19,93 @@ import DeliverableGridSelect from "./DeliverableGridSelect";
 import DeliverableInformation from "./DeliverableInformation";
 
 
-class TaskDialog extends React.Component {
-    constructor(props) {
-        super(props);
-        this.handleClose = this.handleClose.bind(this);
-        this.handleClickOpen = this.handleClickOpen.bind(this);
-        this.onSelectPickup = this.onSelectPickup.bind(this);
-        this.onSelectDropoff = this.onSelectDropoff.bind(this);
-        this.onSelectRider = this.onSelectRider.bind(this);
-        this.onSelectPickedUp = this.onSelectPickedUp.bind(this);
-        this.onSelectDroppedOff = this.onSelectDroppedOff.bind(this);
-        this.onSelectPriority = this.onSelectPriority.bind(this);
-        this.onSelectDeliverable = this.onSelectDeliverable.bind(this);
-        this.onDeliverableNote = this.onDeliverableNote.bind(this);
-        this.sendData = this.sendData.bind(this);
+export default function TaskDialog(props) {
+    const [locationSuggestions, setLocationSuggestions] = useState([]);
+    const [filteredLocationSuggestions, setFilteredLocationSuggestions] = useState([]);
+    const [userSuggestions, setUserSuggestions] = useState([]);
+    const [filteredUserSuggestions, setFilteredUserSuggestions] = useState([]);
+    const [availablePriorities, setAvailablePriorities] = useState([]);
+    const [availableDeliverables, setAvailableDeliverables] = useState([]);
+    const [deliverables, setDeliverables] = useState([]);
+
+    const [open, setOpen] = useState(false);
+    const [pickupLabel, setPickupLabel] = useState("");
+    const [dropoffLabel, setDropoffLabel] = useState("");
+    const [pickupTime, setPickupTime] = useState("");
+    const [dropoffTime, setDropoffTime] = useState("");
+    const [pickupAddress, setPickupAddress] = useState("");
+    const [dropoffAddress, setDropoffAddress] = useState("");
+    const [assignedRider, setAssignedRider] = useState("");
+    const [priority, setPriority] = useState("");
+    const [payload, setPayload] = useState({});
+    const taskId = props.match.params.task_id;
+
+    let history = useHistory();
+
+    let editMode = props.view === "edit";
+
+    let priorityLabel = "";
+
+    function componentDidMount() {
+        props.apiControl.priorities.getPriorities().then((data) => {
+            if (data) {
+                setAvailablePriorities(data)
+            }
+        });
+        props.apiControl.deliverables.getAvailableDeliverables().then((data) => {
+            setAvailableDeliverables(data)
+        });
+        props.apiControl.locations.getLocations().then((data) => {
+            let filteredSuggestions = [];
+            data.map((location) => {
+                filteredSuggestions.push({"label": location.name})
+            });
+            setFilteredLocationSuggestions(filteredSuggestions);
+            setLocationSuggestions(data)
+        });
+        props.apiControl.users.getUsers().then((data) => {
+            let filteredUsers = [];
+            data.map((user) => {
+                if (user.roles.includes("rider")) {
+                    filteredUsers.push({
+                        "label": user.display_name,
+                        "uuid": user.uuid
+                    })
+                }
+                setFilteredUserSuggestions(filteredUsers);
+                setUserSuggestions(data);
+            });
+        });
+        props.apiControl.tasks.getTask(taskId).then((data) => {
+            setPickupTime(data.pickup_time);
+            setDropoffTime(data.dropoff_time);
+            setAssignedRider(data.rider);
+            setPickupAddress(data.pickup_address);
+            setDropoffAddress(data.dropoff_address);
+            setPriority(data.priority_id);
+            priorityLabel = data.priority;
+            setDeliverables(data.deliverables)
+            if (data.pickup_address)
+                if (data.pickup_address.ward)
+                    setPickupLabel(data.pickup_address.line1 + " - " + data.pickup_address.ward);
+                else
+                    setPickupLabel(data.pickup_address.line1);
+
+            if (data.dropoff_address)
+                if (data.dropoff_address.ward)
+                    setDropoffLabel(data.dropoff_address.line1 + " - " + data.dropoff_address.ward);
+                else
+                    setDropoffLabel(data.dropoff_address.line1);
+
+
+
+        });
     }
 
-    state = {
-        open: false,
-        pickupLabel: "Pickup address - ",
-        dropoffLabel: "Dropoff address - ",
-        pickupTime: this.props.pickupTime,
-        dropoffTime: this.props.dropoffTime,
-        pickupAddress: this.props.pickupAddress,
-        dropoffAddress: this.props.dropoffAddress,
-        assignedRider: this.props.assignedRider,
-        priority: this.props.priority,
-        payLoad: {}
-    };
+    useEffect(componentDidMount, [])
 
-    componentDidMount() {
-        let pick = "";
-        let drop = "";
-        if (this.props.pickupAddress) {
-            pick = this.props.pickupAddress.line1
-        }
-        if (this.props.dropoffAddress) {
-            drop = this.props.dropoffAddress.line1
-        }
-        this.setState({
-            pickupLabel: this.state.pickupLabel + pick,
-            dropoffLabel: this.state.dropoffLabel + drop,
-        })
-    }
-
-    onSelectPickup(selectedItem) {
-        let result = this.props.locations.filter(location => location.name === selectedItem);
+    function onSelectPickup(selectedItem) {
+        let result = locationSuggestions.filter(location => location.name === selectedItem);
         if (result.length === 1) {
             let pickup_address = {
                 ward: result[0]['address']['ward'],
@@ -76,23 +117,18 @@ class TaskDialog extends React.Component {
                 postcode: result[0]['address']['postcode'],
 
             };
-            this.sendData({pickup_address: pickup_address});
-            const updated = update(this.state.payLoad, {pickup_address: {$set: pickup_address}})
-            this.setState({
-                payLoad: updated,
-                pickupLabel: "Pickup address - " + pickup_address.line1,
-                pickupAddress: pickup_address
-            });
-        }
-        else {
-            this.setState({
-                pickupLabel: "Pickup address - "
-            });
+            sendData({pickup_address: pickup_address});
+            const updated = update(payload, {pickup_address: {$set: pickup_address}})
+            setPayload(updated);
+            setPickupLabel("Pickup address - " + pickup_address.line1);
+            setPickupAddress(pickup_address);
+        } else {
+            setPickupLabel("Pickup address - ");
         }
     }
 
-    onSelectDropoff(selectedItem) {
-        let result = this.props.locations.filter(location => location.name === selectedItem);
+    function onSelectDropoff(selectedItem) {
+        let result = locationSuggestions.filter(location => location.name === selectedItem);
 
         if (result.length === 1) {
             let dropoff_address = {
@@ -102,30 +138,26 @@ class TaskDialog extends React.Component {
                 town: result[0]['address']['town'],
                 county: result[0]['address']['county'],
                 country: result[0]['address']['country'],
-                postcode: result[0]['address']['postcode']};
-            this.sendData({dropoff_address: dropoff_address});
-            const updated = update(this.state.payLoad, {dropoff_address: {$set: dropoff_address}})
-            this.setState({
-                payLoad: updated,
-                dropoffAddress: dropoff_address,
-                dropoffLabel: "Dropoff address - " + dropoff_address.line1
-            });
+                postcode: result[0]['address']['postcode']
+            };
+            sendData({dropoff_address: dropoff_address});
+            const updated = update(payload, {dropoff_address: {$set: dropoff_address}});
+            setPayload(updated);
+            setDropoffAddress(dropoff_address);
+            setDropoffLabel("Dropoff address - " + dropoff_address.line1);
 
-        }
-        else {
-            this.setState({
-                dropoffLabel: "Dropoff address - "
-            });
+        } else {
+            setDropoffLabel("Dropoff address - ")
         }
 
     }
 
-    sendData(payload) {
-        this.props.apiControl.tasks.updateTask(this.props.uuid, payload)
+    function sendData(payload) {
+        props.apiControl.tasks.updateTask(taskId, payload)
     }
 
-    onSelectRider(selectedItem) {
-        let result = this.props.users.filter(rider => rider.display_name === selectedItem);
+    function onSelectRider(selectedItem) {
+        let result = userSuggestions.filter(rider => rider.display_name === selectedItem);
         if (result.length === 1) {
             let rider = {
                 name: result[0]['name'],
@@ -133,8 +165,8 @@ class TaskDialog extends React.Component {
                 vehicle: result[0]['vehicle'],
                 uuid: result[0]['uuid']
             };
-            this.sendData({assigned_rider: rider.uuid});
-            const updated = update(this.state.payLoad,
+            sendData({assigned_rider: rider.uuid});
+            const updated = update(payload,
                 {
                     rider:
                         {$set: rider},
@@ -142,195 +174,264 @@ class TaskDialog extends React.Component {
                         {$set: rider.uuid}
                 }
             );
-            this.setState({
-                payLoad: updated,
-                assignedRider: rider
-            });
+            setPayload(updated);
+            setAssignedRider(rider);
         }
     }
 
-    onSelectPriority(selectedItemId) {
-        let result = this.props.availablePriorities.filter(item => item.id === selectedItemId);
-        this.sendData({priority_id: selectedItemId});
+    function onSelectPriority(selectedItemId) {
+        let result = availablePriorities.filter(item => item.id === selectedItemId);
+        sendData({priority_id: selectedItemId});
         if (result.length === 1) {
-            this.setState({
-                priority: result[0].label
-            });
-            const updated = update(this.state.payLoad, {priority: {$set: result[0].label}});
-            console.log(updated)
-
-            this.setState({
-                payLoad: updated
-            })
+            setPriority(result[0].label);
+            const updated = update(payload, {priority: {$set: result[0].label}});
+            console.log(updated);
+            setPayload(updated)
         }
     }
 
-    onSelectPickedUp(status) {
-        let pickup_time = status ? moment.utc().toISOString() : null
-        this.setState(
-            {
-                pickupTime: pickup_time
-            }
-        );
-        this.sendData({pickup_time: pickup_time});
-        const updated = update(this.state.payLoad, {pickup_time: {$set: pickup_time}});
-        this.setState({
-            payLoad: updated,
-            pickupTime: pickup_time
-        });
+    function onSelectPickedUp(status) {
+        let pickup_time = status ? moment.utc().toISOString() : null;
+        setPickupTime(pickup_time);
+        sendData({pickup_time: pickup_time});
+        const updated = update(payload, {pickup_time: {$set: pickup_time}});
+        setPayload(updated);
+        setPickupTime(pickup_time);
     }
 
-    onSelectDroppedOff(status) {
-        let dropoff_time = status ? moment.utc().toISOString() : null
-        this.sendData({dropoff_time: dropoff_time});
-        const updated = update(this.state.payLoad, {dropoff_time: {$set: dropoff_time}});
-        this.setState({
-            payLoad: updated,
-            dropoffTime: dropoff_time
-        });
+    function onSelectDroppedOff(status) {
+        let dropoff_time = status ? moment.utc().toISOString() : null;
+        sendData({dropoff_time: dropoff_time});
+        const updated = update(payload, {dropoff_time: {$set: dropoff_time}});
+        setPayload(updated);
+        setDropoffTime(dropoff_time);
     }
 
-    onSelectDeliverable(uuid, type_id) {
+    function onSelectDeliverable(uuid, type_id) {
         console.log(uuid)
-        this.props.apiControl.deliverables.updateDeliverable(uuid, {"type_id": type_id});
-    }
-    onDeliverableNote(uuid, value) {
-        this.props.apiControl.notes.updateNote(uuid, {"body": value});
-
+        props.apiControl.deliverables.updateDeliverable(uuid, {"type_id": type_id});
     }
 
-    handleClickOpen() {
-        this.setState({open: true});
+    function onDeliverableNote(uuid, value) {
+        props.apiControl.notes.updateNote(uuid, {"body": value});
+
     }
 
-    handleClose() {
-        this.props.updateCallback(this.props.uuid, this.state.payLoad);
-        this.setState({
-            open: false,
-            payLoad: {}
-        });
+    function handleClickOpen() {
+        setOpen(true);
     }
 
-    render() {
-        let usersSelect = <></>;
-        if(!this.props.riderView) {
-            usersSelect =
-                <>
-                    <UsersSelect id="userSelect" suggestions={this.props.userSuggestions}
-                                 onSelect={this.onSelectRider}
-                                 disabled={this.props.riderView}/>
-                    <DialogContentText>
-                        {this.state.assignedRider ? "Currently assigned to " + this.state.assignedRider.name + "." : ""}
-                    </DialogContentText>
-                </>;
-        }
-        let prioritySelect = <></>
-        if (this.props.riderView) {
-            prioritySelect = this.props.priority ? <><br/><DialogContentText>Priority {this.props.priority}</DialogContentText></> : ""
+    let handleClose = e => {
+        //props.updateCallback(taskId, payload);
+        setOpen(false);
+        setPayload({});
+        e.stopPropagation();
+        history.goBack();
+    };
 
-        }
-        else {
-            prioritySelect = <PrioritySelect priority={this.props.priority}
-                                                 availablePriorities={this.props.availablePriorities}
-                                                 onSelect={this.onSelectPriority}/>;
-        }
-        let pickupTimeNotice = <></>;
-        if (this.state.pickupTime) {
-            pickupTimeNotice = <>Picked up at <Moment format={"llll"}>{this.state.pickupTime}</Moment></>
-        }
-        let dropoffTimeNotice = <></>;
-        if (this.state.dropoffTime) {
-            dropoffTimeNotice = <>Dropped off at <Moment format={"llll"}>{this.state.dropoffTime}</Moment></>
-        }
-        let deliverableSelect = <DeliverableInformation apiControl={this.props.apiControl} taskId={this.props.uuid}/>;
-        if (!this.props.riderView) {
-            deliverableSelect = <><DialogContentText>
-                Add a deliverable
-            </DialogContentText>
-            <DeliverableGridSelect apiControl={this.props.apiControl}
-            taskId={this.props.uuid}
-            availableDeliverables={this.props.availableDeliverables}
-            onSelect={this.onSelectDeliverable}
-            onNoteChange={this.onDeliverableNote}/>
+    let usersSelect = <></>;
+    if (editMode) {
+        usersSelect =
+            <>
+                <UsersSelect id="userSelect" suggestions={filteredUserSuggestions}
+                             onSelect={onSelectRider}/>
+                <DialogContentText>
+                    {assignedRider ? "Currently assigned to " + assignedRider.display_name + "." : ""}
+                </DialogContentText>
+            </>;
+    }
+    let prioritySelect = <></>;
+    if (!editMode) {
+        prioritySelect = priority ? <>
+            <DialogContentText>Priority {priorityLabel}</DialogContentText></> : ""
+
+    } else {
+        prioritySelect = <PrioritySelect priority={priority}
+                                         availablePriorities={availablePriorities}
+                                         onSelect={onSelectPriority}/>;
+    }
+    let pickupTimeNotice = <></>;
+    if (pickupTime) {
+        pickupTimeNotice = <>Picked up at <Moment format={"llll"}>{pickupTime}</Moment></>
+    }
+    let dropoffTimeNotice = <></>;
+    if (dropoffTime) {
+        dropoffTimeNotice = <>Dropped off at <Moment format={"llll"}>{dropoffTime}</Moment></>
+    }
+    let deliverableSelect = <DeliverableInformation apiControl={props.apiControl} taskId={taskId}/>;
+    if (editMode) {
+        deliverableSelect = <><DialogContentText>
+            Add a deliverable
+        </DialogContentText>
+            <DeliverableGridSelect apiControl={props.apiControl}
+                                   taskId={taskId}
+                                   deliverables={deliverables}
+                                   availableDeliverables={availableDeliverables}
+                                   onSelect={onSelectDeliverable}
+                                   onNoteChange={onDeliverableNote}/>
         </>;
-        }
+    }
+
+    if (props.modal) {
         return (
-            <div>
-                <TaskCard
-                    title={"Task"}
-                    pickupAddress={this.props.pickupAddress}
-                    dropoffAddress={this.props.dropoffAddress}
-                    assignedRider={this.props.assignedRider}
-                    pickupTime={this.props.pickupTime}
-                    dropoffTime={this.props.dropoffTime}
-                    timestamp={this.props.timestamp}
-                    priority={this.props.priority}
-
-                    onClick={() => {
-                        this.handleClickOpen()
-                    }}/>
-                <Dialog fullScreen={true} open={this.state.open} onClose={this.handleClose}
-
+            <>
+                <Dialog fullScreen={false} open={true} onClose={handleClose}
                         aria-labelledby="form-dialog-title">
                     <DialogActions>
-                        <Button onClick={() => {
-                            this.handleClose({
-                                "task": this.props.uuid,
-                                "body": document.getElementById("note").value
-                            })
-                        }} color="primary">
+                        <Button onClick={handleClose}
+                                color="primary">
                             Close
                         </Button>
                     </DialogActions>
                     <DialogTitle id="form-dialog-title">
-                        {this.state.pickupAddress ? this.state.pickupAddress.line1 + " to " : ""} {this.state.dropoffAddress ? this.state.dropoffAddress.line1 + " " : ""} {this.state.assignedRider ? "assigned to " + this.state.assignedRider.name : ""}
+                        <Grid container
+                              spacing={2}
+                              direction={"column"}
+                              justify={"flex-start"}
+                              alignItems={"flex-start"}>
+                            <Grid item>
+                                {pickupAddress ? "FROM: " + pickupAddress.line1 + "." : ""}
+                            </Grid>
+                            <Grid item>
+                                {dropoffAddress ? "TO: " + dropoffAddress.line1 + "." : ""}
+                            </Grid>
+                            <Grid item>
+                                {assignedRider ? "Assigned to: " + assignedRider.display_name + "." : ""}
+                            </Grid>
+                        </Grid>
                     </DialogTitle>
                     <DialogContent>
-                        <AddressDetailsCollapsible label={this.state.pickupLabel}
-                                                   onSelect={this.onSelectPickup}
-                                                   locations={this.props.locations}
-                                                   suggestions={this.props.suggestions}
-                                                   address={this.state.pickupAddress}
-                                                   disabled={this.props.riderView}
-                        />
-                        <br/>
-                        <AddressDetailsCollapsible label={this.state.dropoffLabel}
-                                                   onSelect={this.onSelectDropoff}
-                                                   locations={this.props.locations}
-                                                   suggestions={this.props.suggestions}
-                                                   address={this.state.dropoffAddress}
-                                                   disabled={this.props.riderView}/>
-                        <br/>
-                        {usersSelect}
-                        <br/>
-                        {prioritySelect}
-
-                        <br/>
-
-                        {deliverableSelect}
-                        <br/>
-
-                        <ToggleTimeStamp label={"Picked Up"} status={!!this.state.pickupTime} onSelect={this.onSelectPickedUp}/>
-                        <DialogContentText>
-                            {pickupTimeNotice}
-                        </DialogContentText>
-                        <br/>
-                        <ToggleTimeStamp label={"Delivered"}  status={!!this.state.dropoffTime} onSelect={this.onSelectDroppedOff}/>
-                        <DialogContentText>
-                            {dropoffTimeNotice}
-                        </DialogContentText>
-                        <TextField
-                            margin="dense"
-                            id="note"
-                            label="Add a note!"
-                            type="text"
-                            fullWidth
-                        />
+                        <Grid container
+                              spacing={3}
+                              direction={"column"}
+                              justify={"flex-start"}
+                              alignItems={"flex-start"}>
+                            <Grid item>
+                                <AddressDetailsCollapsible label={pickupLabel}
+                                                           onSelect={onSelectPickup}
+                                                           locations={locationSuggestions}
+                                                           suggestions={filteredLocationSuggestions}
+                                                           address={pickupAddress}
+                                                           disabled={!editMode}
+                                />
+                            </Grid>
+                            <Grid item>
+                                <AddressDetailsCollapsible label={dropoffLabel}
+                                                           onSelect={onSelectDropoff}
+                                                           locations={locationSuggestions}
+                                                           suggestions={filteredLocationSuggestions}
+                                                           address={dropoffAddress}
+                                                           disabled={!editMode}/>
+                            </Grid>
+                            <Grid item>
+                                {usersSelect}
+                            </Grid>
+                            <Grid item>
+                                {prioritySelect}
+                            </Grid>
+                            <Grid item>
+                                {deliverableSelect}
+                            </Grid>
+                            <Grid item>
+                                <ToggleTimeStamp label={"Picked Up"} status={!!pickupTime}
+                                                 onSelect={onSelectPickedUp}/>
+                                <DialogContentText>
+                                    {pickupTimeNotice}
+                                </DialogContentText>
+                            </Grid>
+                            <Grid item>
+                                <ToggleTimeStamp label={"Delivered"} status={!!dropoffTime}
+                                                 onSelect={onSelectDroppedOff}/>
+                                <DialogContentText>
+                                    {dropoffTimeNotice}
+                                </DialogContentText>
+                            </Grid>
+                            <Grid item>
+                                <TextField
+                                    margin="dense"
+                                    id="note"
+                                    label="Add a note!"
+                                    type="text"
+                                    fullWidth
+                                />
+                            </Grid>
+                        </Grid>
                     </DialogContent>
                 </Dialog>
+            </>
+        );
+    }
+    else {
+        return (
+            <div style={{background: "white", paddingLeft: 30, paddingTop: 100, paddingRight: 30, paddingBottom: 100}}>
+                        <Grid container
+                              spacing={2}
+                              direction={"column"}
+                              justify={"flex-start"}
+                              alignItems={"flex-start"}>
+                            <Grid item>
+                                {pickupAddress ? "FROM: " + pickupAddress.line1 + "." : ""}
+                            </Grid>
+                            <Grid item>
+                                {dropoffAddress ? "TO: " + dropoffAddress.line1 + "." : ""}
+                            </Grid>
+                            <Grid item>
+                                {assignedRider ? "Assigned to: " + assignedRider.display_name + "." : ""}
+                            </Grid>
+                        </Grid>
+                        <Grid container
+                              spacing={3}
+                              direction={"column"}
+                              justify={"flex-start"}
+                              alignItems={"flex-start"}>
+                            <Grid item>
+                                <AddressDetailsCollapsible label={pickupLabel}
+                                                           onSelect={onSelectPickup}
+                                                           locations={locationSuggestions}
+                                                           suggestions={filteredLocationSuggestions}
+                                                           address={pickupAddress}
+                                                           disabled={!editMode}
+                                />
+                            </Grid>
+                            <Grid item>
+                                <AddressDetailsCollapsible label={dropoffLabel}
+                                                           onSelect={onSelectDropoff}
+                                                           locations={locationSuggestions}
+                                                           suggestions={filteredLocationSuggestions}
+                                                           address={dropoffAddress}
+                                                           disabled={!editMode}/>
+                            </Grid>
+                            <Grid item>
+                                {usersSelect}
+                            </Grid>
+                            <Grid item>
+                                {prioritySelect}
+                            </Grid>
+                            <Grid item>
+                                {deliverableSelect}
+                            </Grid>
+                            <Grid item>
+                                <ToggleTimeStamp label={"Picked Up"} status={!!pickupTime}
+                                                 onSelect={onSelectPickedUp}/>
+                                    {pickupTimeNotice}
+                            </Grid>
+                            <Grid item>
+                                <ToggleTimeStamp label={"Delivered"} status={!!dropoffTime}
+                                                 onSelect={onSelectDroppedOff}/>
+                                    {dropoffTimeNotice}
+                            </Grid>
+                            <Grid item>
+                                <TextField
+                                    margin="dense"
+                                    id="note"
+                                    label="Add a note!"
+                                    type="text"
+                                    fullWidth
+                                />
+                            </Grid>
+                        </Grid>
             </div>
         );
     }
 }
 
-export default withRouter(TaskDialog);
