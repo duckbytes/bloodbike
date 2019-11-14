@@ -9,13 +9,29 @@ import update from 'immutability-helper';
 import moment from 'moment/min/moment-with-locales';
 import { useTheme } from '@material-ui/core/styles';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { addTask, getAllTasks } from '../redux/Actions'
+import {connect} from "react-redux"
+import store from "../redux/Store"
 
 import {
     Link,
     useLocation,
 } from "react-router-dom";
 
-export default function SessionDetail(props) {
+const mapStateToProps = state => {
+    return {
+        tasks: state.tasks
+    };
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onAddTaskClick: task =>  dispatch(addTask(task)),
+        getTasksList: sessionId => dispatch(getAllTasks(sessionId)),
+    }
+};
+
+function Session(props) {
     const theme = useTheme();
     const fullScreenModal = !useMediaQuery(theme.breakpoints.up('md'));
 
@@ -25,10 +41,10 @@ export default function SessionDetail(props) {
     const [loaded, setLoaded] = useState(false);
 
     function setup() {
+        props.getTasksList({session_id: props.match.params.session_uuid});
         props.apiControl.sessions.getSession(props.match.params.session_uuid)
             .then((session_data) => {
                 if (session_data) {
-                    setTasks(orderTaskList(session_data.tasks));
                     setTimestamp(session_data.timestamp);
                     setUUID(session_data.uuid);
                 }
@@ -60,13 +76,7 @@ export default function SessionDetail(props) {
     const circleAdd =
         <StyledAddCircleOutline
             onClick={() => {
-                let newTask = {...emptyTask};
-                newTask.timestamp = moment.utc().toISOString();
-                props.apiControl.tasks.createTask(newTask).then((data) => {
-                    newTask.uuid = data.uuid;
-                    setTasks([newTask, ...tasks])
-
-                })
+                props.onAddTaskClick(emptyTask)
             }
             }
         />;
@@ -84,7 +94,7 @@ export default function SessionDetail(props) {
                     <Grid item xs={10} sm={5} md={4} lg={3}>
                         {circleAdd}
                     </Grid>
-                    {tasks.map(task => {
+                    {orderTaskList(props.tasks).map(task => {
                         return (
                             <Grid item xs={10} sm={5} md={4} lg={3} key={task.uuid}>
                                 <Link style={{ textDecoration: 'none' }}
@@ -121,3 +131,10 @@ export default function SessionDetail(props) {
         return <></>
     }
 }
+
+const SessionDetail = connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(Session)
+
+export default SessionDetail

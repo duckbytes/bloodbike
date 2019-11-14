@@ -12,7 +12,7 @@ from app.api.functions.taskfunctions import check_rider_match
 from app import db
 
 task_schema = schemas.TaskSchema()
-tasks_schema = schemas.TaskSchema(many=True, exclude=('contact_name', 'contact_number', 'deliverables', 'dropoff_address', 'notes', 'pickup_address'))
+tasks_schema = schemas.TaskSchema(many=True)
 
 TASK = models.Objects.TASK
 SESSION = models.Objects.SESSION
@@ -77,6 +77,7 @@ class Tasks(Resource):
             task = load_request_into_object(TASK)
         except SchemaValidationError as e:
             return schema_validation_error(str(e))
+        print(task)
         db.session.add(task)
         db.session.commit()
 

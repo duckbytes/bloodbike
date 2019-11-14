@@ -10,6 +10,10 @@ import Grid from "@material-ui/core/Grid";
 import update from 'immutability-helper';
 import {Link} from "react-router-dom";
 import Moment from "react-moment";
+import {addSession} from "../redux/Actions";
+import {connect} from "react-redux"
+import {getAllSessions} from "../redux/Actions";
+import { bindActionCreators } from "redux";
 
 const useStyles = makeStyles({
     card: {
@@ -39,7 +43,21 @@ function SessionCard(props) {
     )
 }
 
-class SessionsList extends React.Component {
+const mapStateToProps = state => {
+    return {
+        sessions: state.sessions
+    };
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onAddSessionClick: session =>  dispatch(addSession(session)),
+        getSessionsList: userId => dispatch(getAllSessions(userId)),
+
+}
+};
+
+class SessList extends React.Component {
     constructor(props) {
         super(props)
     }
@@ -47,11 +65,15 @@ class SessionsList extends React.Component {
     componentDidMount() {
         this.props.apiControl.users.whoami()
             .then((my_data) => {
-                this.props.apiControl.sessions.getSessions(my_data.uuid)
+                this.props.getSessionsList({user_id: my_data.uuid})
+                this.setState(({
+                    myUUID: my_data.uuid
+                }))
+                /*this.props.apiControl.sessions.getSessions(my_data.uuid)
                     .then((data) => {
+                        this.setState({loaded: true})
                         if (data) {
                             this.setState({
-                                sessions: data,
                                 myUUID: my_data.uuid,
                                 loaded: true
                             });
@@ -59,14 +81,14 @@ class SessionsList extends React.Component {
                         this.setState({
                             loaded: true
                         });
-                    })
+                    })*/
             })
     }
 
     state = {
         sessions: [],
         myUUID: "",
-        loaded: false
+        loaded: true
     };
 
     emptySession = {
@@ -82,16 +104,8 @@ class SessionsList extends React.Component {
                                         let newSession = {...this.emptySession};
                                         newSession.user_id = this.state.myUUID;
                                         newSession.timestamp = date.toISOString();
-                                        this.setState(({
-                                            sessions: [newSession, ...this.state.sessions]
-                                        }));
-                                        this.props.apiControl.sessions.createSession(newSession).then((data) => {
-                                            const index = this.state.sessions.indexOf(newSession);
-                                            this.setState({
-                                                sessions: update(this.state.sessions, {[index]: {uuid: {$set: data.uuid}}})
-                                            })
+                                        this.props.onAddSessionClick(newSession)
 
-                                        })
                                     }
                                     }
             />;
@@ -112,7 +126,7 @@ class SessionsList extends React.Component {
                 <Grid item xs={10} sm={5} md={4} lg={3}>
                     {addButton}
                 </Grid>
-                {this.state.sessions.map((session) => (
+                {this.props.sessions.map((session) => (
                     <Grid item xs={10} sm={5} md={4} lg={3} key={session.uuid}>
                         <Link to={"/session/" + session.uuid} style={{ textDecoration: 'none' }}>
                             <SessionCard session={session}/>
@@ -127,4 +141,9 @@ class SessionsList extends React.Component {
     }
 }
 
-export default SessionsList;
+const SessionList = connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(SessList);
+
+export default SessionList
