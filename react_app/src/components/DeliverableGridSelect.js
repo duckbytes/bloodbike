@@ -5,65 +5,37 @@ import DeliverableDropSelect from "./DeliverableDropSelect";
 import update from 'immutability-helper';
 
 
-export default class DeliverableGridSelect extends React.Component {
-    constructor(props) {
-        super(props);
-        this.onSelectDeliverableType = this.onSelectDeliverableType.bind(this);
-    }
+export default function DeliverableGridSelect(props) {
 
-
-    state = {
-        deliverables: []
-    };
-
-    emptyDeliverable = {
-        task_id: this.props.taskId,
+   let emptyDeliverable = {
+        task_id: props.taskId,
         timestamp: new Date().toISOString(),
         desc_note_id: null
     };
 
-    componentDidMount() {
-        this.props.apiControl.tasks.getTask(this.props.taskId).then((data) => {
-            this.setState({
-                deliverables: data.deliverables
-                }
 
-            )
-        })
+    function onSelectDeliverableType(uuid, deliverableType) {
+        props.onSelect(uuid, deliverableType)
     }
 
-    onSelectDeliverableType(uuid, deliverableType) {
-        let result = this.state.deliverables.filter(deliverable => deliverable.uuid === uuid);
-        if (result.length === 1) {
-            const index = this.state.tasks.indexOf(result[0]);
-            const updated = update(this.state.deliverables, {[index]: {$set: {deliverableType: deliverableType}}});
-            this.setState({
-                deliverables: updated
-            });
-        }
-        this.props.onSelect(uuid, deliverableType, "lol")
-    }
+    const circleAdd =
+        <StyledAddCircleOutlineSmall
+            onClick={() => {
+                let newDeliverable = {...emptyDeliverable};
+                props.apiControl.deliverables.createDeliverable(newDeliverable).then((data) => {
+                    newDeliverable.uuid = data.uuid;
+                    props.apiControl.notes.createNote({"deliverable_id": data.uuid}).then((data) => {
+                        newDeliverable.desc_note_id = data.uuid;
 
-    render() {
-        const circleAdd =
-            <StyledAddCircleOutlineSmall
-                onClick={() => {
-                    let newDeliverable = {...this.emptyDeliverable};
-                    this.props.apiControl.deliverables.createDeliverable(newDeliverable).then((data) => {
-                        newDeliverable.uuid = data.uuid;
-                        this.props.apiControl.notes.createNote({"deliverable_id": data.uuid}).then((data) => {
-                            newDeliverable.desc_note_id = data.uuid
-                            this.setState({
-                                deliverables: [newDeliverable, ...this.state.deliverables]
-                            })
-
-                        })
+                        props.onNew(newDeliverable);
 
                     })
 
-                }
-                }
-            />;
+                })
+
+            }
+            }
+        />;
 
 
         return (
@@ -76,13 +48,13 @@ export default class DeliverableGridSelect extends React.Component {
                 <Grid item>
                     {circleAdd}
                 </Grid>
-                {this.state.deliverables.map(deliverable => {
+                {props.deliverables.map(deliverable => {
                     return <><Grid item>
                         <DeliverableDropSelect key={deliverable.uuid}
-                                               availableDeliverables={this.props.availableDeliverables}
+                                               availableDeliverables={props.availableDeliverables}
                                                deliverable={deliverable}
-                                               onSelect={this.props.onSelect}
-                                               onNoteChange={this.props.onNoteChange}
+                                               onSelect={props.onSelect}
+                                               onNoteChange={props.onNoteChange}
                                                uuid={deliverable.uuid}/>
                     </Grid></>
 
@@ -91,5 +63,4 @@ export default class DeliverableGridSelect extends React.Component {
             </Grid>
         )
 
-    }
 }

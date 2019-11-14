@@ -21,9 +21,8 @@ const useStyles = makeStyles(theme => ({
 
 export default function PrioritySelect(props) {
     const classes = useStyles();
-    let result = props.availablePriorities.filter(item => item.label === props.priority);
     const [values, setValues] = React.useState({
-        priority: result.length === 1 ? result[0].id : null
+        priority: props.priority ? props.priority : null
     });
 
 
@@ -34,10 +33,6 @@ export default function PrioritySelect(props) {
     }, []);
 
     const handleChange = event => {
-        setValues(oldValues => ({
-            ...oldValues,
-            [event.target.name]: event.target.value,
-        }));
         props.onSelect(event.target.value);
     };
 
@@ -53,7 +48,7 @@ export default function PrioritySelect(props) {
                     Priority
                 </InputLabel>
                 <Select
-                    value={values.priority}
+                    value={props.priority}
                     onChange={handleChange}
                     labelWidth={labelWidth}
                     inputProps={{
