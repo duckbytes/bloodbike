@@ -26,7 +26,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import { useTheme } from '@material-ui/core/styles';
 import Grid from "@material-ui/core/Grid";
-import Main from "./Main";
+import Main from "../components/Main";
 
 
 const drawerWidth = 240;
@@ -103,7 +103,7 @@ export function ResponsiveDrawer(props) {
                         <ListItemText primary={"Home"}/>
                     </ListItem>
                     {sessionLink}
-                    <ListItem component={Link} to={"/user/" + myUUID + "/tasks"} button>
+                    <ListItem component={Link} to={"/mytasks"} button>
                         <ListItemIcon><InboxIcon/></ListItemIcon>
                         <ListItemText primary={"My Tasks"}/>
                     </ListItem>

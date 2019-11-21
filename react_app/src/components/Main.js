@@ -1,15 +1,15 @@
 import React from 'react';
 import 'typeface-roboto'
-import Home from './Home'
+import Home from '../containers/Home'
 import '../index.css';
 import App from "../App";
-import SessionsList from './SessionList';
-import UserProfile from './UserProfile'
+import SessionsList from '../containers/SessionList';
+import UserProfile from '../containers/UserProfile'
 import {BrowserRouter as Router, Route, Switch, useLocation, useHistory, useParams} from "react-router-dom";
-import SessionDetail from "./SessionDetail";
-import TaskDetail from "./TaskDetail";
+import SessionDetail from "../containers/SessionDetail";
+import TaskDetail from "../containers/TaskDetail";
 import Login from "../Login";
-import UsersTasks from "./UsersTasks";
+import UsersTasks from "../containers/UsersTasks";
 import TaskModal from "./TaskModal";
 
 export default function Main(_props) {
@@ -27,7 +27,7 @@ export default function Main(_props) {
                 <Route path='/profile'
                        render={(props) => <UserProfile {...props} apiControl={_props.apiControl}/>}
                 />
-                <Route path='/user/:user_uuid/tasks'
+                <Route path='/mytasks'
                        render={(props) => <UsersTasks {...props} apiControl={_props.apiControl}/>}
                 />
                 <Route path='/session/:session_uuid'

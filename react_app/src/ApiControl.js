@@ -155,7 +155,7 @@ class Deliverable {
     }
 
     async getDeliverables(task_id) {
-        return makeFetch(this.api_url, "deliverables" + task_id, "GET", this.bearer)
+        return makeFetch(this.api_url, "deliverables/" + task_id, "GET", this.bearer)
     }
 
     async getDeliverable(deliverable_id) {
@@ -170,9 +170,7 @@ class Deliverable {
         return makeFetch(this.api_url, "deliverable/" + deliverable_id, "PUT", this.bearer, "application/json", input_data)
     }
     async getAvailableDeliverables() {
-        return new Promise((resolve, reject) => {
-            resolve(this.availableDeliverables);
-        });
+        return makeFetch(this.api_url, "deliverables/available", "GET", this.bearer, "application/json");
     }
 }
 

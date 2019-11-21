@@ -62,7 +62,6 @@ function TaskDialog(props) {
     if (taskResult.length === 1) {
         task = taskResult[0];
     }
-    console.log(task.priority_id ? task.priority_id : "no")
     function componentDidMount() {
 
         props.apiControl.priorities.getPriorities().then((data) => {
@@ -164,11 +163,8 @@ function TaskDialog(props) {
     }
 
     function sendData(payload, updateData) {
-        let blah = {...payload, task_id: taskId}
         const updateDataCombined = {...payload, ...updateData}
-        console.log(blah)
         props.updateTask({payload: payload, taskId: taskId, updateData: updateDataCombined ? updateDataCombined : {}});
-        //props.apiControl.tasks.updateTask(taskId, payload)
     }
 
     function onSelectRider(selectedItem) {
@@ -181,7 +177,6 @@ function TaskDialog(props) {
                 vehicle: result[0]['vehicle'],
                 uuid: result[0]['uuid']
             };
-            console.log(rider)
             sendData({assigned_rider: rider.uuid}, { rider: rider});
             const updated = update(payload,
                 {
@@ -200,7 +195,6 @@ function TaskDialog(props) {
         sendData({priority_id: selectedItemId, priority: result[0].label});
         if (result.length === 1) {
             const updated = update(payload, {priority: {$set: result[0].label}});
-            console.log(updated);
             setPayload(updated)
         }
     }
