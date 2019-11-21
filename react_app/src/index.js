@@ -12,7 +12,7 @@ import store from "./redux/Store"
 window.store = store;
 
 
-const apiUrl = 'https://bloodbike-api.herokuapp.com/api/v0.1/';
+const apiUrl = 'https://ks361234.kimsufi.com/api/v0.1/';
 
 ReactDOM.render((
         <Provider store={store}>
