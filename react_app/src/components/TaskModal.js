@@ -21,6 +21,7 @@ import {updateTask, getAllTasks} from "../redux/Actions";
 import {connect} from "react-redux"
 import Box from "@material-ui/core/Box";
 import makeStyles from "@material-ui/core/styles/makeStyles";
+import { TextFieldControlled } from "./TextFieldControlled";
 
 const mapStateToProps = state => {
     return {
@@ -48,16 +49,15 @@ const useStyles = makeStyles(({
     },
 }));
 
+
 function TaskDialog(props) {
     const classes = useStyles();
-    console.log(classes)
     const [locationSuggestions, setLocationSuggestions] = useState([]);
     const [filteredLocationSuggestions, setFilteredLocationSuggestions] = useState([]);
     const [userSuggestions, setUserSuggestions] = useState([]);
     const [filteredUserSuggestions, setFilteredUserSuggestions] = useState([]);
     const [availablePriorities, setAvailablePriorities] = useState([]);
     const [availableDeliverables, setAvailableDeliverables] = useState([]);
-    const [deliverables, setDeliverables] = useState([]);
 
     const [open, setOpen] = useState(false);
     const [pickupLabel, setPickupLabel] = useState("");
@@ -69,14 +69,14 @@ function TaskDialog(props) {
 
     let editMode = props.view === "edit";
 
-
     const taskId = props.match.params.task_id;
 
     const taskResult = props.tasks.filter(task => task.uuid === props.match.params.task_id)
-    let task = {};
+    let newTask = {};
     if (taskResult.length === 1) {
-        task = taskResult[0];
+        newTask = taskResult[0];
     }
+    const task = props.task || newTask;
 
     function componentDidMount() {
         props.apiControl.priorities.getPriorities().then((data) => {
@@ -128,51 +128,38 @@ function TaskDialog(props) {
         }
     }
 
-    useEffect(componentDidMount, [])
+    useEffect(componentDidMount, []);
 
-    function onSelectName(result) {
+    function onSelectContactNumber(event) {
+        console.log(event.target.value);
+        sendData({contact_number: event.target.value});
+    }
+
+    function onSelectName(event) {
+        console.log(event.target.value)
+
+        sendData({contact_name: event.target.value});
 
     }
 
-    function onSelectPickup(selectedItem) {
-        let result = locationSuggestions.filter(location => location.name === selectedItem);
-        if (result.length === 1) {
-            let pickup_address = {
-                ward: result[0]['address']['ward'],
-                line1: result[0]['address']['line1'],
-                line2: result[0]['address']['line2'],
-                town: result[0]['address']['town'],
-                county: result[0]['address']['county'],
-                country: result[0]['address']['country'],
-                postcode: result[0]['address']['postcode'],
-
-            };
-            sendData({pickup_address: pickup_address});
-            const updated = update(payload, {pickup_address: {$set: pickup_address}})
+    function onSelectPickup(pickupAddress) {
+        console.log(pickupAddress)
+        if(pickupAddress) {
+            sendData({pickup_address: pickupAddress});
+            const updated = update(payload, {pickup_address: {$set: pickupAddress}})
             setPayload(updated);
-            setPickupLabel("Pickup address - " + pickup_address.line1);
+            setPickupLabel("Pickup address - " + pickupAddress.line1);
         } else {
             setPickupLabel("Pickup address - ");
         }
     }
 
-    function onSelectDropoff(selectedItem) {
-        let result = locationSuggestions.filter(location => location.name === selectedItem);
-
-        if (result.length === 1) {
-            let dropoff_address = {
-                ward: result[0]['address']['ward'],
-                line1: result[0]['address']['line1'],
-                line2: result[0]['address']['line2'],
-                town: result[0]['address']['town'],
-                county: result[0]['address']['county'],
-                country: result[0]['address']['country'],
-                postcode: result[0]['address']['postcode']
-            };
-            sendData({dropoff_address: dropoff_address});
-            const updated = update(payload, {dropoff_address: {$set: dropoff_address}});
+    function onSelectDropoff(dropoffAddress) {
+        if(dropoffAddress) {
+            sendData({dropoff_address: dropoffAddress});
+            const updated = update(payload, {dropoff_address: {$set: dropoffAddress}});
             setPayload(updated);
-            setDropoffLabel("Dropoff address - " + dropoff_address.line1);
+            setDropoffLabel("Dropoff address - " + dropoffAddress.line1);
 
         } else {
             setDropoffLabel("Dropoff address - ")
@@ -232,24 +219,6 @@ function TaskDialog(props) {
         setPayload(updated);
     }
 
-    function onNewDeliverable(newDeliverable) {
-        setDeliverables([newDeliverable, ...deliverables])
-    }
-
-    function onSelectDeliverable(uuid, type_id) {
-        let result = deliverables.filter(deliverable => deliverable.uuid === uuid);
-        if (result.length === 1) {
-            const index = deliverables.indexOf(result[0]);
-            const updated = update(deliverables, {[index]: {type_id: {$set: type_id}}});
-            setDeliverables(updated)
-        }
-        props.apiControl.deliverables.updateDeliverable(uuid, {"type_id": type_id});
-    }
-
-    function onDeliverableNote(uuid, value) {
-        props.apiControl.notes.updateNote(uuid, {"body": value});
-    }
-
     function handleClickOpen() {
         setOpen(true);
     }
@@ -298,10 +267,7 @@ function TaskDialog(props) {
             <DeliverableGridSelect apiControl={props.apiControl}
                                    taskId={taskId}
                                    deliverables={task.deliverables ? task.deliverables : []}
-                                   availableDeliverables={availableDeliverables}
-                                   onNew={onNewDeliverable}
-                                   onSelect={onSelectDeliverable}
-                                   onNoteChange={onDeliverableNote}/>
+                                   availableDeliverables={availableDeliverables}/>
         </>;
     }
 
@@ -342,20 +308,16 @@ function TaskDialog(props) {
 
                             <Grid item>
                                 <Box className={classes.box}>
-                                    <TextField
-                                        margin="dense"
-                                        id="name"
-                                        label="Name"
-                                        type="text"
-                                        fullWidth
-                                    />
-                                    <TextField
-                                        margin="dense"
-                                        id="contact-number"
-                                        label="Contact Number"
-                                        type="text"
-                                        fullWidth
-                                    />
+                                    <TextFieldControlled
+                                        value={task.contact_name}
+                                        label={"Contact Name"}
+                                        id={"contact-name"}
+                                        onSelect={onSelectName}/>
+                                    <TextFieldControlled
+                                        label={"Contact Number"}
+                                        id={"contact-number"}
+                                        value={task.contact_number}
+                                        onSelect={onSelectContactNumber}/>
                                 </Box>
                             </Grid>
 
